@@ -1,4 +1,4 @@
-OPENCONNECT_2.0 {
+OPENCONNECT_2.1 {
  global: 
 	openconnect_clear_cookie;
 	openconnect_get_cert_sha1;
@@ -28,6 +28,7 @@ OPENCONNECT_2.0 {
 	openconnect_init_ssl;
 	openconnect_has_tss_blob_support;
 	openconnect_has_pkcs11_support;
+	openconnect_set_stoken_mode;
 };
 
 OPENCONNECT_PRIVATE {
