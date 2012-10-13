@@ -606,6 +606,14 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 	const char *request_body_type = NULL;
 	const char *method = "GET";
 
+	if (vpninfo->use_stoken) {
+		result = prepare_stoken(vpninfo);
+		if (result < 0)
+			return result;
+		if (result > 0)
+			vpninfo->use_stoken = 0;
+	}
+
  retry:
 	if (form_buf) {
 		free(form_buf);
