@@ -544,6 +544,31 @@ AS_IF([test "x$with_liboath" != "xno"], [
 		 liboath_pkg=no)
 ])
 
+AC_ARG_WITH([jni],
+	AS_HELP_STRING([--with-jni],
+	[Build JNI hooks into library [default=no]]))
+
+if test "$with_jni" = "yes"; then
+	AX_JNI_INCLUDE_DIR
+	for JNI_INCLUDE_DIR in $JNI_INCLUDE_DIRS; do
+		  JNI_CFLAGS="$JNI_CFLAGS -I$JNI_INCLUDE_DIR"
+	done
+
+	oldCFLAGS="$CFLAGS"
+	CFLAGS="$CFLAGS $JNI_CFLAGS"
+	AC_MSG_CHECKING([jni.h usability])
+	AC_COMPILE_IFELSE([AC_LANG_PROGRAM([#include <jni.h>],
+		[jint foo = 0; (void)foo;])],
+		AC_MSG_RESULT([yes]),
+		[AC_MSG_RESULT([no])
+		 AC_MSG_ERROR([unable to compile JNI test program])])
+	CFLAGS="$oldCFLAGS"
+
+	AC_SUBST(JNI_CFLAGS, [$JNI_CFLAGS])
+fi
+
+AM_CONDITIONAL(OPENCONNECT_JNI, [test "$JNI_CFLAGS" != ""])
+
 AC_CHECK_HEADER([if_tun.h],
     [AC_DEFINE([IF_TUN_HDR], ["if_tun.h"])],
     [AC_CHECK_HEADER([linux/if_tun.h],

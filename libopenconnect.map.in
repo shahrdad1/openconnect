@@ -43,6 +43,11 @@ OPENCONNECT_2.2 {
 	openconnect_set_token_mode;
 } OPENCONNECT_2.1;
 
+OPENCONNECT_JNI {
+ global:
+	Java_*;
+};
+
 OPENCONNECT_PRIVATE {
  global: @SYMVER_TIME@ @SYMVER_ASPRINTF@ @SYMVER_GETLINE@ @SYMVER_PRINT_ERR@
 	openconnect_SSL_gets;
