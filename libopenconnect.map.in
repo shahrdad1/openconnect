@@ -69,6 +69,7 @@ OPENCONNECT_PRIVATE {
 	openconnect_create_useragent;
 	openconnect_sha1;
 	openconnect_random;
+	Java_*;
  local:
 	*;
 };
