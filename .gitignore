@@ -27,7 +27,7 @@ version.c
 /openconnect.8
 /openconnect.pc
 
-openconnect
+/openconnect
 nm-openconnect-auth-dialog
 Make.config
 Makefile.in
