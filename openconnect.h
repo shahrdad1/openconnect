@@ -217,6 +217,11 @@ void openconnect_set_cert_expiry_warning(struct openconnect_info *vpninfo,
    cancellation mechanism inactive. */
 void openconnect_set_cancel_fd(struct openconnect_info *vpninfo, int fd);
 
+/* Create a nonblocking pipe, set the read end as the cancel_fd, and return a
+   file descriptor for the write end. Both sides will be closed by
+   openconnect_vpninfo_free(). */
+int openconnect_setup_cancel_pipe(struct openconnect_info *vpninfo);
+
 const char *openconnect_get_version(void);
 
 /* The first (privdata) argument to each of these functions is either

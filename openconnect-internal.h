@@ -295,6 +295,7 @@ struct openconnect_info {
 	int dtls_fd;
 	int new_dtls_fd;
 	int cancel_fd;
+	int cancel_fd_write;
 
 	struct pkt *incoming_queue;
 	struct pkt *outgoing_queue;
