@@ -27,7 +27,6 @@
 #include <limits.h>
 #include <sys/select.h>
 #include <stdlib.h>
-#include <signal.h>
 #include <unistd.h>
 #include <string.h>
 
@@ -55,23 +54,9 @@ int queue_new_packet(struct pkt **q, void *buf, int len)
 	return 0;
 }
 
-int killed;
-
-static void handle_sigint(int sig)
+int openconnect_mainloop(struct openconnect_info *vpninfo)
 {
-	killed = sig;
-}
-
-int vpn_mainloop(struct openconnect_info *vpninfo)
-{
-	struct sigaction sa;
-	memset(&sa, 0, sizeof(sa));
-	sa.sa_handler = handle_sigint;
-
-	sigaction(SIGTERM, &sa, NULL);
-	sigaction(SIGINT, &sa, NULL);
-	sigaction(SIGHUP, &sa, NULL);
-
+	cancel_fd_set(vpninfo, &vpninfo->select_rfds, &vpninfo->select_nfds);
 	while (!vpninfo->quit_reason) {
 		int did_work = 0;
 		int timeout = INT_MAX;
@@ -103,13 +88,8 @@ int vpn_mainloop(struct openconnect_info *vpninfo)
 		if (vpninfo->quit_reason)
 			break;
 
-		if (killed) {
-			if (killed == SIGHUP)
-				vpninfo->quit_reason = "Client received SIGHUP";
-			else if (killed == SIGINT)
-				vpninfo->quit_reason = "Client received SIGINT";
-			else
-				vpninfo->quit_reason = "Client killed";
+		if (cancel_fd_check(vpninfo)) {
+			vpninfo->quit_reason = "Aborted by caller";
 			break;
 		}
 

@@ -224,6 +224,10 @@ int openconnect_setup_cancel_pipe(struct openconnect_info *vpninfo);
 
 const char *openconnect_get_version(void);
 
+/* Start the main loop; exits if data is received on cancel_fd or the remote
+   site aborts. */
+int openconnect_mainloop(struct openconnect_info *vpninfo);
+
 /* The first (privdata) argument to each of these functions is either
    the privdata argument provided to openconnect_vpninfo_new_with_cbdata(),
    or if that argument was NULL then it'll be the vpninfo itself. */
