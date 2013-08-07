@@ -363,6 +363,35 @@ char *openconnect__strcasestr(const char *haystack, const char *needle);
 		free(__realloc_old);			\
     } while (0)
 
+static inline void cancel_fd_set(struct openconnect_info *vpninfo, fd_set *fds, int *maxfd)
+{
+	if (vpninfo->cancel_fd != -1) {
+		FD_SET(vpninfo->cancel_fd, fds);
+		if (vpninfo->cancel_fd > *maxfd)
+			*maxfd = vpninfo->cancel_fd;
+	}
+}
+
+static inline int cancel_fd_isset(struct openconnect_info *vpninfo, fd_set *fds)
+{
+	return vpninfo->cancel_fd != -1 && FD_ISSET(vpninfo->cancel_fd, fds);
+}
+
+static inline int cancel_fd_check(struct openconnect_info *vpninfo)
+{
+	fd_set rd_set;
+	int maxfd = 0;
+	struct timeval tv = { 0, 0 };
+
+	if (vpninfo->cancel_fd == -1)
+		return 0;
+
+	FD_ZERO(&rd_set);
+	cancel_fd_set(vpninfo, &rd_set, &maxfd);
+	select(maxfd + 1, &rd_set, NULL, NULL, &tv);
+	return cancel_fd_isset(vpninfo, &rd_set);
+}
+
 /****************************************************************************/
 
 /* tun.c */
