@@ -122,6 +122,8 @@ void openconnect_vpninfo_free(struct openconnect_info *vpninfo)
 	free(vpninfo->redirect_url);
 	free(vpninfo->proxy_type);
 	free(vpninfo->proxy);
+	free(vpninfo->vpnc_script);
+	free(vpninfo->ifname);
 
 	if (vpninfo->csd_scriptname) {
 		unlink(vpninfo->csd_scriptname);
