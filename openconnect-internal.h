@@ -259,7 +259,7 @@ struct openconnect_info {
 	unsigned char dtls_secret[48];
 
 	char *dtls_cipher;
-	const char *vpnc_script;
+	char *vpnc_script;
 	int script_tun;
 	char *ifname;
 
@@ -390,7 +390,6 @@ static inline int cancel_fd_check(struct openconnect_info *vpninfo, int timeout)
 /****************************************************************************/
 
 /* tun.c */
-int setup_tun(struct openconnect_info *vpninfo);
 int tun_mainloop(struct openconnect_info *vpninfo, int *timeout);
 void shutdown_tun(struct openconnect_info *vpninfo);
 int script_config_tun(struct openconnect_info *vpninfo, const char *reason);
