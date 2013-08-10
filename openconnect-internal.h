@@ -184,7 +184,7 @@ struct openconnect_info {
 	char *proxy;
 	int proxy_port;
 
-	const char *localname;
+	char *localname;
 	char *hostname;
 	char *unique_hostname;
 	int port;
