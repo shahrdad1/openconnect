@@ -55,6 +55,7 @@ OPENCONNECT_2.4 {
 	openconnect_set_server_cert_sha1;
 	openconnect_get_ifname;
 	openconnect_set_reqmtu;
+	openconnect_get_ip_info;
 } OPENCONNECT_2.2;
 
 OPENCONNECT_PRIVATE {
