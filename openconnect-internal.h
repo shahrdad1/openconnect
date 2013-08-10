@@ -401,7 +401,6 @@ int dtls_try_handshake(struct openconnect_info *vpninfo);
 int connect_dtls_socket(struct openconnect_info *vpninfo);
 
 /* cstp.c */
-int make_cstp_connection(struct openconnect_info *vpninfo);
 int cstp_mainloop(struct openconnect_info *vpninfo, int *timeout);
 int cstp_bye(struct openconnect_info *vpninfo, const char *reason);
 int cstp_reconnect(struct openconnect_info *vpninfo);
