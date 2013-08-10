@@ -131,6 +131,27 @@ struct oc_auth_form {
 	struct oc_form_opt *opts;
 };
 
+struct oc_split_include {
+	char *route;
+	struct oc_split_include *next;
+};
+
+struct oc_ip_info {
+	const char *addr;
+	const char *netmask;
+	const char *addr6;
+	const char *netmask6;
+	const char *dns[3];
+	const char *nbns[3];
+	const char *domain;
+	const char *proxy_pac;
+	int mtu;
+
+	struct oc_split_include *split_dns;
+	struct oc_split_include *split_includes;
+	struct oc_split_include *split_excludes;
+};
+
 /****************************************************************************/
 
 #define PRG_ERR		0
@@ -196,6 +217,7 @@ void openconnect_set_client_cert(struct openconnect_info *, char *cert, char *ss
 void openconnect_set_server_cert_sha1(struct openconnect_info *, char *);
 const char *openconnect_get_ifname(struct openconnect_info *);
 void openconnect_set_reqmtu(struct openconnect_info *, int reqmtu);
+const struct oc_ip_info *openconnect_get_ip_info(struct openconnect_info *);
 
 /* This is *not* yours and must not be destroyed with X509_free(). It
  * will be valid when a cookie has been obtained successfully, and will
