@@ -162,6 +162,27 @@ struct oc_auth_form {
 #endif
 };
 
+struct oc_split_include {
+	char *route;
+	struct oc_split_include *next;
+};
+
+struct oc_ip_info {
+	const char *addr;
+	const char *netmask;
+	const char *addr6;
+	const char *netmask6;
+	const char *dns[3];
+	const char *nbns[3];
+	const char *domain;
+	const char *proxy_pac;
+	int mtu;
+
+	struct oc_split_include *split_dns;
+	struct oc_split_include *split_includes;
+	struct oc_split_include *split_excludes;
+};
+
 /****************************************************************************/
 
 #define PRG_ERR		0
