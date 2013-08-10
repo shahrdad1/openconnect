@@ -258,6 +258,10 @@ void openconnect_set_client_cert(struct openconnect_info *, char *cert, char *ss
 void openconnect_set_server_cert_sha1(struct openconnect_info *, char *);
 const char *openconnect_get_ifname(struct openconnect_info *);
 void openconnect_set_reqmtu(struct openconnect_info *, int reqmtu);
+int openconnect_get_ip_info(struct openconnect_info *,
+			    const struct oc_ip_info **info,
+			    const struct oc_vpn_option **cstp_options,
+			    const struct oc_vpn_option **dtls_options);
 
 /* This is *not* yours and must not be destroyed with X509_free(). It
  * will be valid when a cookie has been obtained successfully, and will
