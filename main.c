@@ -487,6 +487,7 @@ int main(int argc, char **argv)
 	char *proxy = getenv("https_proxy");
 	int script_tun = 0;
 	char *vpnc_script = NULL, *ifname = NULL;
+	const struct oc_ip_info *ip_info;
 	int autoproxy = 0;
 	uid_t uid = getuid();
 	int opt;
@@ -907,11 +908,12 @@ int main(int argc, char **argv)
 	if (use_dtls && openconnect_setup_dtls(vpninfo, 60))
 		fprintf(stderr, _("Set up DTLS failed; using SSL instead\n"));
 
+	ip_info = openconnect_get_ip_info(vpninfo);
 	vpn_progress(vpninfo, PRG_INFO,
 		     _("Connected %s as %s%s%s, using %s\n"), openconnect_get_ifname(vpninfo),
-		     vpninfo->vpn_addr?:"",
-		     (vpninfo->vpn_addr6 && vpninfo->vpn_addr) ? " + " : "",
-		     vpninfo->vpn_addr6 ? : "",
+		     ip_info->addr?:"",
+		     (ip_info->addr6 && ip_info->addr) ? " + " : "",
+		     ip_info->addr6 ? : "",
 		     (vpninfo->dtls_fd == -1) ?
 		     (vpninfo->deflate ? "SSL + deflate" : "SSL")
 		     : "DTLS");
