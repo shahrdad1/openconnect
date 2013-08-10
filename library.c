@@ -57,7 +57,6 @@ struct openconnect_info *openconnect_vpninfo_new(char *useragent,
 	vpninfo->cancel_fd = vpninfo->cancel_fd_write = -1;
 	vpninfo->cert_expire_warning = 60 * 86400;
 	vpninfo->deflate = 1;
-	vpninfo->dtls_attempt_period = 60;
 	vpninfo->max_qlen = 10;
 	vpninfo->localname = strdup("localhost");
 	vpninfo->useragent = openconnect_create_useragent(useragent);
