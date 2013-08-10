@@ -491,6 +491,7 @@ int main(int argc, char **argv)
 	uid_t uid = getuid();
 	int opt;
 	char *pidfile = NULL;
+	int use_dtls = 1;
 	FILE *fp = NULL;
 	char *config_arg;
 	char *token_str = NULL;
@@ -553,7 +554,7 @@ int main(int argc, char **argv)
 			vpninfo->servercert = keep_config_arg();
 			break;
 		case OPT_NO_DTLS:
-			vpninfo->dtls_attempt_period = 0;
+			use_dtls = 0;
 			break;
 		case OPT_COOKIEONLY:
 			cookieonly = 1;
@@ -901,7 +902,7 @@ int main(int argc, char **argv)
 		}
 	}
 
-	if (vpninfo->dtls_attempt_period && setup_dtls(vpninfo))
+	if (use_dtls && openconnect_setup_dtls(vpninfo, 60))
 		fprintf(stderr, _("Set up DTLS failed; using SSL instead\n"));
 
 	vpn_progress(vpninfo, PRG_INFO,
