@@ -904,7 +904,7 @@ int prepare_stoken(struct openconnect_info *vpninfo)
 	memset(&opts, 0, sizeof(opts));
 
 	form.opts = opts;
-	form.message = _("Enter credentials to unlock software token.");
+	form.message = (char *)_("Enter credentials to unlock software token.");
 
 	vpninfo->token_tries = 0;
 	vpninfo->token_bypassed = 0;
@@ -912,21 +912,21 @@ int prepare_stoken(struct openconnect_info *vpninfo)
 	if (stoken_devid_required(vpninfo->stoken_ctx)) {
 		opt->type = OC_FORM_OPT_TEXT;
 		opt->name = (char *)"devid";
-		opt->label = _("Device ID:");
+		opt->label = (char *)_("Device ID:");
 		devid = &opt->value;
 		opt++;
 	}
 	if (stoken_pass_required(vpninfo->stoken_ctx)) {
 		opt->type = OC_FORM_OPT_PASSWORD;
 		opt->name = (char *)"password";
-		opt->label = _("Password:");
+		opt->label = (char *)_("Password:");
 		pass = &opt->value;
 		opt++;
 	}
 	if (stoken_pin_required(vpninfo->stoken_ctx)) {
 		opt->type = OC_FORM_OPT_PASSWORD;
 		opt->name = (char *)"password";
-		opt->label = _("PIN:");
+		opt->label = (char *)_("PIN:");
 		pin = &opt->value;
 		opt++;
 	}
