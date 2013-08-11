@@ -382,6 +382,7 @@ int connect_dtls_socket(struct openconnect_info *vpninfo);
 int cstp_mainloop(struct openconnect_info *vpninfo, int *timeout);
 int cstp_bye(struct openconnect_info *vpninfo, const char *reason);
 int cstp_reconnect(struct openconnect_info *vpninfo);
+void cstp_free_splits(struct openconnect_info *vpninfo);
 
 /* ssl.c */
 int connect_https_socket(struct openconnect_info *vpninfo);
