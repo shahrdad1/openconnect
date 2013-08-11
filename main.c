@@ -889,6 +889,7 @@ int main(int argc, char **argv)
 	}
 	if (openconnect_make_cstp_connection(vpninfo)) {
 		fprintf(stderr, _("Creating SSL connection failed\n"));
+		openconnect_vpninfo_free(vpninfo);
 		exit(1);
 	}
 
@@ -897,10 +898,12 @@ int main(int argc, char **argv)
 	if (script_tun) {
 		if (openconnect_setup_tun_script(vpninfo, vpnc_script)) {
 			fprintf(stderr, _("Set up tun script failed\n"));
+			openconnect_vpninfo_free(vpninfo);
 			exit(1);
 		}
 	} else if (openconnect_setup_tun_device(vpninfo, vpnc_script, ifname)) {
 		fprintf(stderr, _("Set up tun device failed\n"));
+		openconnect_vpninfo_free(vpninfo);
 		exit(1);
 	}
 
@@ -908,6 +911,7 @@ int main(int argc, char **argv)
 		if (setuid(uid)) {
 			fprintf(stderr, _("Failed to set uid %ld\n"),
 				(long)uid);
+			openconnect_vpninfo_free(vpninfo);
 			exit(1);
 		}
 	}
@@ -943,6 +947,7 @@ int main(int argc, char **argv)
 			if (!fp) {
 				fprintf(stderr, _("Failed to open '%s' for write: %s\n"),
 					pidfile, strerror(errno));
+				openconnect_vpninfo_free(vpninfo);
 				exit(1);
 			}
 		}
@@ -954,6 +959,7 @@ int main(int argc, char **argv)
 			vpn_progress(vpninfo, PRG_INFO,
 				     _("Continuing in background; pid %d\n"),
 				     pid);
+			openconnect_vpninfo_free(vpninfo);
 			exit(0);
 		}
 		if (fp)
@@ -966,6 +972,7 @@ int main(int argc, char **argv)
 
 	if (fp)
 		unlink(pidfile);
+	openconnect_vpninfo_free(vpninfo);
 	exit(1);
 }
 
