@@ -196,8 +196,9 @@ static int start_cstp_connection(struct openconnect_info *vpninfo)
 	if (vpninfo->dtls_times.last_rekey + vpninfo->dtls_times.rekey <
 	    time(NULL) + 300 &&
 	    openconnect_random(vpninfo->dtls_secret, sizeof(vpninfo->dtls_secret))) {
-		fprintf(stderr, _("Failed to initialise DTLS secret\n"));
-		exit(1);
+		vpn_progress(vpninfo, PRG_ERR,
+			     _("Failed to initialise DTLS secret\n"));
+		return -EIO;
 	}
 
  retry:
@@ -238,7 +239,7 @@ static int start_cstp_connection(struct openconnect_info *vpninfo)
 				vpn_progress(vpninfo, PRG_ERR,
 					     _("Failed to open HTTPS connection to %s\n"),
 					     vpninfo->hostname);
-				exit(1);
+				return -EIO;
 			}
 			goto retry;
 		}
@@ -264,7 +265,7 @@ static int start_cstp_connection(struct openconnect_info *vpninfo)
 			     _("Got inappropriate HTTP CONNECT response: %s\n"),
 			     buf);
 		if (!strncmp(buf, "HTTP/1.1 401 ", 13))
-			exit(2);
+			return -EPERM;
 		return -EINVAL;
 	}
 
