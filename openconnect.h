@@ -32,9 +32,18 @@
 #include <unistd.h>
 
 #define OPENCONNECT_API_VERSION_MAJOR 2
-#define OPENCONNECT_API_VERSION_MINOR 2
+#define OPENCONNECT_API_VERSION_MINOR 3
 
 /*
+ * API version 2.3:
+ *  - Add openconnect_setup_cancel_pipe(), openconnect_mainloop(),
+ *    openconnect_setup_tun_device(), openconnect_setup_tun_script(),
+ *    openconnect_setup_tun_fd(), openconnect_setup_dtls(),
+ *    openconnect_make_cstp_connection(), openconnect_set_server_cert_sha1(),
+ *    openconnect_get_ifname(), openconnect_set_reqmtu(),
+ *    openconnect_get_ip_info(), openconnect_set_protect_socket_handler(),
+ *    openconnect_set_mobile_info()
+ *
  * API version 2.2:
  *  - Add openconnect_set_token_mode(), openconnect_has_oath_support()
  *  - Deprecate openconnect_set_stoken_mode()
