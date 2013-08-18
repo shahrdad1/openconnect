@@ -46,6 +46,7 @@ OPENCONNECT_2.2 {
 OPENCONNECT_2.4 {
  global:
 	openconnect_setup_cmd_pipe;
+	openconnect_mainloop;
 } OPENCONNECT_2.2;
 
 OPENCONNECT_PRIVATE {
