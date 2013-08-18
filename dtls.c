@@ -531,6 +531,8 @@ int connect_dtls_socket(struct openconnect_info *vpninfo)
 		perror(_("Open UDP socket for DTLS:"));
 		return -EINVAL;
 	}
+	if (vpninfo->protect_socket)
+		vpninfo->protect_socket(vpninfo->cbdata, dtls_fd);
 
 	if (vpninfo->dtls_local_port) {
 		union {
