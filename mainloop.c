@@ -54,8 +54,13 @@ int queue_new_packet(struct pkt **q, void *buf, int len)
 	return 0;
 }
 
-int vpn_mainloop(struct openconnect_info *vpninfo)
+int openconnect_mainloop(struct openconnect_info *vpninfo,
+			 int reconnect_timeout,
+			 int reconnect_interval)
 {
+	vpninfo->reconnect_timeout = reconnect_timeout;
+	vpninfo->reconnect_interval = reconnect_interval;
+
 	if (vpninfo->cmd_fd != -1) {
 		FD_SET(vpninfo->cmd_fd, &vpninfo->select_rfds);
 		if (vpninfo->cmd_fd >= vpninfo->select_nfds)
