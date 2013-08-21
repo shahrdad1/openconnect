@@ -1048,6 +1048,8 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 					orig_host = NULL;
 					free(vpninfo->urlpath);
 					vpninfo->urlpath = orig_path;
+					free(vpninfo->peer_addr);
+					vpninfo->peer_addr = NULL;
 					orig_path = NULL;
 					vpninfo->port = orig_port;
 				}
