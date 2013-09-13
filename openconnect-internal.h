@@ -126,6 +126,10 @@ struct pin_cache {
 #define REDIR_TYPE_NEWHOST	1
 #define REDIR_TYPE_LOCAL	2
 
+#define AUTHGROUP_NOT_SELECTED	0
+#define AUTHGROUP_SELECTED	1
+#define AUTHGROUP_SENT		2
+
 struct openconnect_info {
 	char *redirect_url;
 	int redirect_type;
@@ -169,6 +173,7 @@ struct openconnect_info {
 	char *username;
 	char *password;
 	char *authgroup;
+	int authgroup_selected;
 	int nopasswd;
 	int xmlpost;
 	char *dtls_ciphers;
@@ -446,7 +451,8 @@ int handle_auth_form(struct openconnect_info *vpninfo, struct oc_auth_form *form
 		     char *request_body, int req_len, const char **method,
 		     const char **request_body_type);
 void free_auth_form(struct oc_auth_form *form);
-int xmlpost_initial_req(struct openconnect_info *vpninfo, char *request_body, int req_len, int cert_fail);
+int xmlpost_initial_req(struct openconnect_info *vpninfo, char *request_body, int req_len,
+			int cert_fail, const char *group_select);
 int prepare_stoken(struct openconnect_info *vpninfo);
 
 /* http.c */

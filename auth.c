@@ -112,17 +112,16 @@ static int append_form_opts(struct openconnect_info *vpninfo,
 	return 0;
 }
 
-/*
- * Maybe we should offer this choice to the user. So far we've only
- * ever seen it offer bogus choices though -- between certificate and
- * password authentication, when the former has already failed.
- * So we just accept the first option with an auth-type property.
+/* Return value:
+ *  < 0, on error
+ *  = 0, success; continue parsing the rest of the form
+ *  = 1, success; return immediately to let the user select his authgroup
  */
-
 static int parse_auth_choice(struct openconnect_info *vpninfo, struct oc_auth_form *form,
 			     xmlNode *xml_node)
 {
 	struct oc_form_opt_select *opt;
+	int ret = 0;
 
 	opt = calloc(1, sizeof(*opt));
 	if (!opt)
@@ -136,6 +135,18 @@ static int parse_auth_choice(struct openconnect_info *vpninfo, struct oc_auth_fo
 		vpn_progress(vpninfo, PRG_ERR, _("Form choice has no name\n"));
 		free(opt);
 		return -EINVAL;
+	}
+
+	if (vpninfo->xmlpost && !strcmp(opt->form.name, "group_list")) {
+		if (vpninfo->authgroup_selected != AUTHGROUP_NOT_SELECTED) {
+			free(opt->form.name);
+			free(opt->form.label);
+			free(opt);
+			return 0;
+		} else {
+			vpninfo->authgroup_selected = AUTHGROUP_SELECTED;
+			ret = 1;
+		}
 	}
 
 	for (xml_node = xml_node->children; xml_node; xml_node = xml_node->next) {
@@ -173,30 +184,44 @@ static int parse_auth_choice(struct openconnect_info *vpninfo, struct oc_auth_fo
 	   to the user */
 	opt->form.next = form->opts;
 	form->opts = &opt->form;
-	return 0;
+	return ret;
 }
 
 /* Return value:
  *  < 0, on error
- *  = 0, when form was cancelled
- *  = 1, when form was parsed
+ *  = 0, when form was parsed
  */
 static int parse_form(struct openconnect_info *vpninfo, struct oc_auth_form *form,
-		      xmlNode *xml_node)
+		      xmlNode *root)
 {
 	char *input_type, *input_name, *input_label;
+	xmlNode *xml_node;
 
-	for (xml_node = xml_node->children; xml_node; xml_node = xml_node->next) {
+	/* first pass: look for "select" dropdowns so we can prompt the user for
+	 * his authgroup first
+	 */
+	for (xml_node = root->children; xml_node; xml_node = xml_node->next) {
+		if (xml_node->type != XML_ELEMENT_NODE)
+			continue;
+
+		if (!strcmp((char *)xml_node->name, "select")) {
+			int ret = parse_auth_choice(vpninfo, form, xml_node);
+			if (ret < 0)
+				return -EINVAL;
+			else if (ret > 0)
+				return 0;
+		}
+	}
+
+	/* if authgroup was selected on the last round (or didn't exist), proceed to
+	 * the second pass
+	 */
+	for (xml_node = root->children; xml_node; xml_node = xml_node->next) {
 		struct oc_form_opt *opt, **p;
 
 		if (xml_node->type != XML_ELEMENT_NODE)
 			continue;
 
-		if (!strcmp((char *)xml_node->name, "select")) {
-			if (parse_auth_choice(vpninfo, form, xml_node))
-				return -EINVAL;
-			continue;
-		}
 		if (strcmp((char *)xml_node->name, "input")) {
 			vpn_progress(vpninfo, PRG_TRACE,
 				     _("name %s not input\n"), xml_node->name);
@@ -782,7 +807,8 @@ static int xmlpost_complete(xmlDocPtr doc, char *body, int bodylen)
 	return ret;
 }
 
-int xmlpost_initial_req(struct openconnect_info *vpninfo, char *request_body, int req_len, int cert_fail)
+int xmlpost_initial_req(struct openconnect_info *vpninfo, char *request_body, int req_len,
+			int cert_fail, const char *group_select)
 {
 	xmlNodePtr root, node;
 	xmlDocPtr doc = xmlpost_new_query(vpninfo, "init", &root);
@@ -808,6 +834,11 @@ int xmlpost_initial_req(struct openconnect_info *vpninfo, char *request_body, in
 		if (!node)
 			goto bad;
 	}
+	if (group_select) {
+		node = xmlNewTextChild(root, NULL, XCAST("group-select"), XCAST(group_select));
+		if (!node)
+			goto bad;
+	}
 	return xmlpost_complete(doc, request_body, req_len);
 
 bad:
@@ -819,9 +850,21 @@ static int xmlpost_append_form_opts(struct openconnect_info *vpninfo,
 				    struct oc_auth_form *form, char *body, int bodylen)
 {
 	xmlNodePtr root, node;
-	xmlDocPtr doc = xmlpost_new_query(vpninfo, "auth-reply", &root);
+	xmlDocPtr doc;
 	struct oc_form_opt *opt;
 
+	if (vpninfo->authgroup_selected == AUTHGROUP_SELECTED) {
+		char *group_select = NULL;
+		for (opt = form->opts; opt; opt = opt->next) {
+			if (!strcmp(opt->name, "group_list"))
+				group_select = opt->value;
+		}
+
+		vpninfo->authgroup_selected = AUTHGROUP_SENT;
+		return xmlpost_initial_req(vpninfo, body, bodylen, 0, group_select);
+	}
+
+	doc = xmlpost_new_query(vpninfo, "auth-reply", &root);
 	if (!doc)
 		return -ENOMEM;
 

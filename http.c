@@ -1037,7 +1037,7 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 	 * b) Same-host redirect (e.g. Location: /foo/bar)
 	 * c) Three redirects without seeing a plausible login form
 	 */
-	result = xmlpost_initial_req(vpninfo, request_body, sizeof(request_body), 0);
+	result = xmlpost_initial_req(vpninfo, request_body, sizeof(request_body), 0, NULL);
 	if (result < 0)
 		return result;
 
@@ -1086,6 +1086,7 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 		else if (vpninfo->redirect_type != REDIR_TYPE_NONE)
 			continue;
 
+		vpninfo->authgroup_selected = AUTHGROUP_NOT_SELECTED;
 		result = parse_xml_response(vpninfo, form_buf, &form, &cert_rq);
 		if (result < 0)
 			goto fail;
@@ -1107,7 +1108,7 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 				vpn_progress(vpninfo, PRG_INFO, _("Server requested SSL client certificate; none was configured\n"));
 			}
 			/* Try again with <client-cert-fail/> in the request */
-			result = xmlpost_initial_req(vpninfo, request_body, sizeof(request_body), 1);
+			result = xmlpost_initial_req(vpninfo, request_body, sizeof(request_body), 1, NULL);
 			if (result < 0)
 				goto fail;
 			continue;
