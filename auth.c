@@ -736,8 +736,15 @@ static xmlDocPtr xmlpost_new_query(struct openconnect_info *vpninfo, const char 
 	if (!xmlNewProp(node, XCAST("who"), XCAST("vpn")))
 		goto bad;
 
-	if (!xmlNewTextChild(root, NULL, XCAST("device-id"), XCAST(vpninfo->platname)))
+	node = xmlNewTextChild(root, NULL, XCAST("device-id"), XCAST(vpninfo->platname));
+	if (!node)
 		goto bad;
+	if (vpninfo->mobile_platform_version) {
+		if (!xmlNewProp(node, XCAST("platform-version"), XCAST(vpninfo->mobile_platform_version)) ||
+		    !xmlNewProp(node, XCAST("device-type"), XCAST(vpninfo->mobile_device_type)) ||
+		    !xmlNewProp(node, XCAST("unique-id"), XCAST(vpninfo->mobile_device_uniqueid)))
+			goto bad;
+	}
 
 	return doc;
 
