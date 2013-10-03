@@ -783,7 +783,8 @@ static int xmlpost_complete(xmlDocPtr doc, char *body, int bodylen)
 	return ret;
 }
 
-int xmlpost_initial_req(struct openconnect_info *vpninfo, char *request_body, int req_len, int cert_fail)
+int xmlpost_initial_req(struct openconnect_info *vpninfo, char *request_body, int req_len,
+			int cert_fail, const char *group_select)
 {
 	xmlNodePtr root, node;
 	xmlDocPtr doc = xmlpost_new_query(vpninfo, "init", &root);
@@ -806,6 +807,11 @@ int xmlpost_initial_req(struct openconnect_info *vpninfo, char *request_body, in
 		goto bad;
 	if (cert_fail) {
 		node = xmlNewTextChild(root, NULL, XCAST("client-cert-fail"), NULL);
+		if (!node)
+			goto bad;
+	}
+	if (group_select) {
+		node = xmlNewTextChild(root, NULL, XCAST("group-select"), XCAST(group_select));
 		if (!node)
 			goto bad;
 	}
