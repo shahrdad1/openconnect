@@ -58,6 +58,7 @@ OPENCONNECT_2.4 {
 	openconnect_get_ip_info;
 	openconnect_set_protect_socket_handler;
 	openconnect_set_mobile_info;
+	openconnect_set_xmlpost;
 } OPENCONNECT_2.2;
 
 OPENCONNECT_PRIVATE {
