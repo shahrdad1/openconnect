@@ -83,6 +83,10 @@ int nocertcheck;
 int non_inter;
 int cookieonly;
 
+char *username;
+char *password;
+char *authgroup;
+
 enum {
 	OPT_AUTHENTICATE = 0x100,
 	OPT_AUTHGROUP,
@@ -573,7 +577,7 @@ int main(int argc, char **argv)
 				vpninfo->cookie = NULL;
 			break;
 		case OPT_PASSWORD_ON_STDIN:
-			read_stdin(&vpninfo->password);
+			read_stdin(&password);
 			break;
 		case OPT_NO_PASSWD:
 			vpninfo->nopasswd = 1;
@@ -591,7 +595,7 @@ int main(int argc, char **argv)
 			vpninfo->dtls_ciphers = keep_config_arg();
 			break;
 		case OPT_AUTHGROUP:
-			vpninfo->authgroup = keep_config_arg();
+			authgroup = keep_config_arg();
 			break;
 		case 'b':
 			background = 1;
@@ -673,7 +677,7 @@ int main(int argc, char **argv)
 			script_tun = 1;
 			break;
 		case 'u':
-			vpninfo->username = keep_config_arg();
+			username = keep_config_arg();
 			break;
 		case 'U': {
 			char *strend;
@@ -1155,13 +1159,12 @@ static int process_auth_form(void *_vpninfo,
 			if (!select_opt->nr_choices)
 				continue;
 
-			if (vpninfo->authgroup &&
+			if (authgroup &&
 			    !strcmp(opt->name, "group_list")) {
 				for (i = 0; i < select_opt->nr_choices; i++) {
 					choice = &select_opt->choices[i];
 
-					if (!strcmp(vpninfo->authgroup,
-						    choice->label)) {
+					if (!strcmp(authgroup, choice->label)) {
 						opt->value = choice->name;
 						break;
 					}
@@ -1169,7 +1172,7 @@ static int process_auth_form(void *_vpninfo,
 				if (!opt->value)
 					vpn_progress(vpninfo, PRG_ERR,
 						     _("Auth choice \"%s\" not available\n"),
-						     vpninfo->authgroup);
+						     authgroup);
 			}
 			if (!opt->value && select_opt->nr_choices == 1) {
 				choice = &select_opt->choices[0];
@@ -1222,9 +1225,9 @@ static int process_auth_form(void *_vpninfo,
 	for (opt = form->opts; opt; opt = opt->next) {
 
 		if (opt->type == OC_FORM_OPT_TEXT) {
-			if (vpninfo->username &&
+			if (username &&
 			    !strcmp(opt->name, "username")) {
-				opt->value = strdup(vpninfo->username);
+				opt->value = strdup(username);
 				if (!opt->value)
 					goto err;
 			} else if (non_inter) {
@@ -1248,10 +1251,10 @@ static int process_auth_form(void *_vpninfo,
 			}
 
 		} else if (opt->type == OC_FORM_OPT_PASSWORD) {
-			if (vpninfo->password &&
+			if (password &&
 			    !strcmp(opt->name, "password")) {
-				opt->value = vpninfo->password;
-				vpninfo->password = NULL;
+				opt->value = password;
+				password = NULL;
 				if (!opt->value)
 					goto err;
 			} else if (non_inter) {
@@ -1288,9 +1291,9 @@ static int process_auth_form(void *_vpninfo,
 		}
 	}
 
-	if (vpninfo->password) {
-		free(vpninfo->password);
-		vpninfo->password = NULL;
+	if (password) {
+		free(password);
+		password = NULL;
 	}
 
 	return OC_FORM_RESULT_OK;
