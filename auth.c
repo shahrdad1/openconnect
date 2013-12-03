@@ -593,6 +593,28 @@ int parse_xml_response(struct openconnect_info *vpninfo, char *response, struct 
 	return ret;
 }
 
+static struct oc_form_opt *find_form_opt(const struct oc_auth_form *form, const char *name, int type)
+{
+	struct oc_form_opt *opt;
+	for (opt = form->opts; opt; opt = opt->next) {
+		if (opt->name && opt->__real_type == type && !strcmp(opt->name, name))
+			return opt;
+	}
+	return NULL;
+}
+
+static void set_authgroup_name(struct openconnect_info *vpninfo, const struct oc_auth_form *form)
+{
+	struct oc_form_opt *auth_opt;
+
+	free(vpninfo->authgroup);
+	vpninfo->authgroup = NULL;
+
+	auth_opt = find_form_opt(form, "group_list", OC_FORM_OPT_SELECT);
+	if (auth_opt && auth_opt->value)
+		vpninfo->authgroup = strdup(auth_opt->value);
+}
+
 /* Return value:
  *  < 0, on error
  *  = OC_FORM_RESULT_OK (0), when form parsed and POST required
@@ -635,9 +657,19 @@ int handle_auth_form(struct openconnect_info *vpninfo, struct oc_auth_form *form
 		return -EPERM;
 	}
 
-	if (vpninfo->process_auth_form)
-		ret = vpninfo->process_auth_form(vpninfo->cbdata, form);
-	else {
+	if (vpninfo->process_auth_form) {
+		do {
+			ret = vpninfo->process_auth_form(vpninfo->cbdata, form);
+			if (ret == OC_FORM_RESULT_NEWGROUP) {
+				set_authgroup_name(vpninfo, form);
+
+				/* XML POST: ask the server to send a new form for the new group */
+				if (vpninfo->xmlpost)
+					return ret;
+			} else
+				break;
+		} while (1);
+	} else {
 		vpn_progress(vpninfo, PRG_ERR, _("No form handler; cannot authenticate.\n"));
 		ret = OC_FORM_RESULT_CANCELLED;
 	}
