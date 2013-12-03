@@ -1025,6 +1025,7 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 	 * b) Same-host redirect (e.g. Location: /foo/bar)
 	 * c) Three redirects without seeing a plausible login form
 	 */
+newgroup:
 	result = xmlpost_initial_req(vpninfo, request_body, sizeof(request_body), 0);
 	if (result < 0)
 		return result;
@@ -1185,6 +1186,13 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 			goto out;
 		if (result == __OC_FORM_RESULT_LOGGEDIN)
 			break;
+		if (result == OC_FORM_RESULT_NEWGROUP) {
+			free(form_buf);
+			form_buf = NULL;
+			free_auth_form(form);
+			form = NULL;
+			goto newgroup;
+		}
 
 		result = do_https_request(vpninfo, method, request_body_type, request_body,
 					  &form_buf, 1);
