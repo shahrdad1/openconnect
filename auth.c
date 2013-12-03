@@ -631,6 +631,7 @@ int process_auth_form(struct openconnect_info *vpninfo, struct __oc_auth_form *f
 		return OC_FORM_RESULT_ERR;
 	}
 
+retry:
 	/* We have two parallel linked lists of form fields here:
 	   form->u.opts is a linked list of user-visible oc_form_opt's
 	   form->opts is a linked list of internally-visible __oc_form_opt's
@@ -661,6 +662,17 @@ int process_auth_form(struct openconnect_info *vpninfo, struct __oc_auth_form *f
 			sopt->u = NULL;
 		}
 	}
+
+	if (ret == OC_FORM_RESULT_NEWGROUP &&
+	    form->authgroup_opt &&
+	    form->authgroup_opt->form.u.value) {
+		free(vpninfo->authgroup);
+		vpninfo->authgroup = strdup(form->authgroup_opt->form.u.value);
+
+		if (!vpninfo->xmlpost)
+			goto retry;
+	}
+
 	return ret;
 }
 
