@@ -112,6 +112,17 @@ static int append_form_opts(struct openconnect_info *vpninfo,
 	return 0;
 }
 
+static int prop_equals(xmlNode *xml_node, const char *name, const char *value)
+{
+	char *tmp = (char *)xmlGetProp(xml_node, (unsigned char *)name);
+	int ret = 0;
+
+	if (tmp && !strcasecmp(tmp, value))
+		ret = 1;
+	free(tmp);
+	return ret;
+}
+
 /*
  * Maybe we should offer this choice to the user. So far we've only
  * ever seen it offer bogus choices though -- between certificate and
@@ -167,6 +178,7 @@ static int parse_auth_choice(struct openconnect_info *vpninfo, struct oc_auth_fo
 		choice->auth_type = (char *)xmlGetProp(xml_node, (unsigned char *)"auth-type");
 		choice->override_name = (char *)xmlGetProp(xml_node, (unsigned char *)"override-name");
 		choice->override_label = (char *)xmlGetProp(xml_node, (unsigned char *)"override-label");
+		choice->selected = prop_equals(xml_node, "selected", "true");
 	}
 
 	/* We link the choice _first_ so it's at the top of what we present

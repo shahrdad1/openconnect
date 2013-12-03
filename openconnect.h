@@ -126,6 +126,7 @@ struct oc_choice {
 	char *auth_type;
 	char *override_name;
 	char *override_label;
+	int selected;
 };
 
 struct oc_form_opt_select {
