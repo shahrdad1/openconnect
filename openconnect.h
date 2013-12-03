@@ -134,6 +134,8 @@ struct oc_auth_form {
 	char *method;
 	char *action;
 	struct oc_form_opt *opts;
+	char *authgroup_field;
+	int authgroup_selection;
 };
 
 /****************************************************************************/
