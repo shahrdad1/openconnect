@@ -1154,13 +1154,12 @@ static int process_auth_form(void *_vpninfo,
 		if (opt->type == OC_FORM_OPT_SELECT) {
 			struct oc_form_opt_select *select_opt = (void *)opt;
 			struct oc_choice *choice = NULL;
-			int i;
+			int i, is_group_list = !strcmp(opt->name, "group_list");
 
 			if (!select_opt->nr_choices)
 				continue;
 
-			if (authgroup &&
-			    !strcmp(opt->name, "group_list")) {
+			if (authgroup && is_group_list) {
 				for (i = 0; i < select_opt->nr_choices; i++) {
 					choice = &select_opt->choices[i];
 
@@ -1207,9 +1206,13 @@ static int process_auth_form(void *_vpninfo,
 
 			for (i = 0; i < select_opt->nr_choices; i++) {
 				choice = &select_opt->choices[i];
+				select_opt->form.value = choice->name;
 
 				if (!strcmp(response, choice->label)) {
 					select_opt->form.value = choice->name;
+					authgroup = strdup(choice->name);
+					if (is_group_list)
+						return OC_FORM_RESULT_NEWGROUP;
 					break;
 				}
 			}

@@ -105,6 +105,7 @@
 #define OC_FORM_RESULT_ERR		-1
 #define OC_FORM_RESULT_OK		0
 #define OC_FORM_RESULT_CANCELLED	1
+#define OC_FORM_RESULT_NEWGROUP		2
 #define __OC_FORM_RESULT_LOGGEDIN	255	/* internal library use only */
 
 /* char * fields are static (owned by XML parser) and don't need to be
