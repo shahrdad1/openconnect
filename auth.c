@@ -112,6 +112,17 @@ static int append_form_opts(struct openconnect_info *vpninfo,
 	return 0;
 }
 
+static int prop_equals(xmlNode *xml_node, const char *name, const char *value)
+{
+	char *tmp = (char *)xmlGetProp(xml_node, (unsigned char *)name);
+	int ret = 0;
+
+	if (tmp && !strcasecmp(tmp, value))
+		ret = 1;
+	free(tmp);
+	return ret;
+}
+
 /*
  * Maybe we should offer this choice to the user. So far we've only
  * ever seen it offer bogus choices though -- between certificate and
@@ -123,6 +134,7 @@ static int parse_auth_choice(struct openconnect_info *vpninfo, struct __oc_auth_
 			     xmlNode *xml_node)
 {
 	struct __oc_form_opt_select *opt;
+	int selection = 0;
 
 	opt = calloc(1, sizeof(*opt));
 	if (!opt)
@@ -167,6 +179,15 @@ static int parse_auth_choice(struct openconnect_info *vpninfo, struct __oc_auth_
 		choice->u.auth_type = (char *)xmlGetProp(xml_node, (unsigned char *)"auth-type");
 		choice->u.override_name = (char *)xmlGetProp(xml_node, (unsigned char *)"override-name");
 		choice->u.override_label = (char *)xmlGetProp(xml_node, (unsigned char *)"override-label");
+
+		if (prop_equals(xml_node, "selected", "true"))
+			selection = opt->nr_choices - 1;
+	}
+
+	if (!strcmp(opt->form.u.name, "group_list")) {
+		form->u.authgroup_field = opt->form.u.name;
+		form->u.authgroup_selection = selection;
+		form->authgroup_opt = opt;
 	}
 
 	/* We link the choice _first_ so it's at the top of what we present

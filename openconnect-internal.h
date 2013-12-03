@@ -141,6 +141,7 @@ struct __oc_form_opt_select {
 struct __oc_auth_form {
 	struct oc_auth_form u;
 	struct __oc_form_opt *opts;
+	struct __oc_form_opt_select *authgroup_opt;
 };
 
 #define RECONNECT_INTERVAL_MIN	10
