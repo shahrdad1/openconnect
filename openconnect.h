@@ -118,6 +118,7 @@ struct oc_form_opt {
 	char *name;
 	char *label;
 	char *value;
+	int second_auth;
 };
 
 /* All fields are static, owned by the XML parser */
@@ -128,6 +129,11 @@ struct oc_choice {
 	char *override_name;
 	char *override_label;
 	int selected;
+
+	int second_auth;
+	char *secondary_username;
+	int secondary_username_editable;
+	int noaaa;
 };
 
 struct oc_form_opt_select {
