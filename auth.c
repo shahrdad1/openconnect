@@ -123,13 +123,6 @@ static int prop_equals(xmlNode *xml_node, const char *name, const char *value)
 	return ret;
 }
 
-/*
- * Maybe we should offer this choice to the user. So far we've only
- * ever seen it offer bogus choices though -- between certificate and
- * password authentication, when the former has already failed.
- * So we just accept the first option with an auth-type property.
- */
-
 static int parse_auth_choice(struct openconnect_info *vpninfo, struct oc_auth_form *form,
 			     xmlNode *xml_node)
 {
