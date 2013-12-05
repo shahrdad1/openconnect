@@ -119,6 +119,7 @@ struct oc_form_opt {
 	char *label;
 	char *value;
 	int second_auth;
+	int __real_type;			/* internal library use only */
 };
 
 /* All fields are static, owned by the XML parser */

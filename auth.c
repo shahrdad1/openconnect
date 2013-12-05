@@ -133,6 +133,7 @@ static int parse_auth_choice(struct openconnect_info *vpninfo, struct oc_auth_fo
 		return -ENOMEM;
 
 	opt->form.type = OC_FORM_OPT_SELECT;
+	opt->form.__real_type = OC_FORM_OPT_SELECT;
 	opt->form.name = (char *)xmlGetProp(xml_node, (unsigned char *)"name");
 	opt->form.label = (char *)xmlGetProp(xml_node, (unsigned char *)"label");
 
@@ -269,6 +270,7 @@ static int parse_form(struct openconnect_info *vpninfo, struct oc_auth_form *for
 			free(opt);
 			continue;
 		}
+		opt->__real_type = opt->type;
 
 		free(input_type);
 
@@ -616,6 +618,58 @@ static void set_authgroup_name(struct openconnect_info *vpninfo, const struct oc
 		vpninfo->authgroup = strdup(auth_opt->value);
 }
 
+static void hide_form_fields(struct openconnect_info *vpninfo, struct oc_auth_form *form)
+{
+	struct oc_form_opt_select *auth_opt;
+	struct oc_choice *tmp, *auth_choice;
+	struct oc_form_opt *opt;
+	int i;
+
+	auth_opt = (void *)find_form_opt(form, "group_list", OC_FORM_OPT_SELECT);
+	if (vpninfo->xmlpost || !auth_opt || auth_opt->nr_choices < 1)
+		return;
+
+	auth_choice = &auth_opt->choices[0];
+	for (i = 0; i < auth_opt->nr_choices; i++) {
+		tmp = &auth_opt->choices[i];
+		if (tmp->name &&
+		    vpninfo->authgroup &&
+		    !strcmp(tmp->name, vpninfo->authgroup))
+			auth_choice = tmp;
+		tmp->selected = 0;
+	}
+	auth_choice->selected = 1;
+
+	/* "second-auth" fields should vanish if a non-second-auth authgroup is used
+	 * All login/password fields should vanish if the authgroup uses noaaa=1 (cert auth only)
+	 */
+	for (opt = form->opts; opt; opt = opt->next) {
+		if (opt->name &&
+		    opt->__real_type == OC_FORM_OPT_TEXT &&
+		    !strcmp(opt->name, "secondary_username")) {
+			if (opt->second_auth) {
+				if (auth_choice->second_auth &&
+				    auth_choice->secondary_username_editable)
+					opt->type = OC_FORM_OPT_TEXT;
+				else
+					opt->type = OC_FORM_OPT_HIDDEN;
+
+				if (auth_choice->secondary_username) {
+					free(opt->value);
+					opt->value = strdup(auth_choice->secondary_username);
+				}
+			}
+		} else if (auth_choice->noaaa &&
+			   (opt->__real_type == OC_FORM_OPT_TEXT ||
+			    opt->__real_type == OC_FORM_OPT_PASSWORD)) {
+			opt->type = OC_FORM_OPT_HIDDEN;
+		} else if (opt->second_auth) {
+			opt->type = auth_choice->second_auth ?
+				    opt->__real_type : OC_FORM_OPT_HIDDEN;
+		}
+	}
+}
+
 /* Return value:
  *  < 0, on error
  *  = OC_FORM_RESULT_OK (0), when form parsed and POST required
@@ -660,6 +714,7 @@ int handle_auth_form(struct openconnect_info *vpninfo, struct oc_auth_form *form
 
 	if (vpninfo->process_auth_form) {
 		do {
+			hide_form_fields(vpninfo, form);
 			ret = vpninfo->process_auth_form(vpninfo->cbdata, form);
 			if (ret == OC_FORM_RESULT_NEWGROUP) {
 				set_authgroup_name(vpninfo, form);
