@@ -139,7 +139,8 @@ struct oc_auth_form {
 #define PRG_TRACE	3
 
 /* byte commands to write into the cmd_fd */
-#define OC_CMD_CANCEL	'x'
+#define OC_CMD_CANCEL		'x'
+#define OC_CMD_RECONNECT	'r'
 
 #define RECONNECT_INTERVAL_MIN	10
 #define RECONNECT_INTERVAL_MAX	100

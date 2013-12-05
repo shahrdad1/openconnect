@@ -98,6 +98,12 @@ int openconnect_mainloop(struct openconnect_info *vpninfo,
 			vpninfo->quit_reason = "Aborted by caller";
 			break;
 		}
+		if (vpninfo->got_reconnect_cmd) {
+			/* nuke the socket and let cstp_mainloop sort it out */
+			vpninfo->got_reconnect_cmd = 0;
+			close(vpninfo->ssl_fd);
+			vpn_progress(vpninfo, PRG_INFO, _("Caller requested reconnect"));
+		}
 
 		if (did_work)
 			continue;
