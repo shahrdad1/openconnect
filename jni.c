@@ -495,6 +495,7 @@ JNIEXPORT void JNICALL Java_org_infradead_libopenconnect_LibOpenConnect_free(
 	if (!ctx)
 		return;
 	openconnect_vpninfo_free(ctx->vpninfo);
+	(*jenv)->DeleteGlobalRef(jenv, ctx->jobj);
 	free(ctx);
 }
 
