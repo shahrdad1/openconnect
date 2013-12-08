@@ -175,16 +175,20 @@ static int validate_peer_cert_cb(void *privdata, OPENCONNECT_X509 *cert, const c
 	int ret = -1;
 	jmethodID mid;
 
+	if ((*ctx->jenv)->PushLocalFrame(ctx->jenv, 256) < 0)
+		return -1;
+
 	jreason = dup_to_jstring(ctx->jenv, reason);
 	if (!jreason)
-		return -1;
+		goto out;
 
 	ctx->cert = cert;
 	mid = get_obj_mid(ctx, ctx->jobj, "onValidatePeerCert", "(Ljava/lang/String;)I");
 	if (mid)
 		ret = (*ctx->jenv)->CallIntMethod(ctx->jenv, ctx->jobj, mid, jreason);
-	(*ctx->jenv)->DeleteLocalRef(ctx->jenv, jreason);
 
+out:
+	(*ctx->jenv)->PopLocalFrame(ctx->jenv, NULL);
 	return ret;
 }
 
@@ -194,6 +198,9 @@ static int write_new_config_cb(void *privdata, char *buf, int buflen)
 	jmethodID mid;
 	jbyteArray jbuf;
 	int ret = -1;
+
+	if ((*ctx->jenv)->PushLocalFrame(ctx->jenv, 256) < 0)
+		return -1;
 
 	mid = get_obj_mid(ctx, ctx->jobj, "onWriteNewConfig", "([B)I");
 	if (!mid)
@@ -205,9 +212,9 @@ static int write_new_config_cb(void *privdata, char *buf, int buflen)
 	(*ctx->jenv)->SetByteArrayRegion(ctx->jenv, jbuf, 0, buflen, (jbyte *)buf);
 
 	ret = (*ctx->jenv)->CallIntMethod(ctx->jenv, ctx->jobj, mid, jbuf);
-	(*ctx->jenv)->DeleteLocalRef(ctx->jenv, jbuf);
 
 out:
+	(*ctx->jenv)->PopLocalFrame(ctx->jenv, NULL);
 	return ret;
 }
 
@@ -216,9 +223,14 @@ static void protect_socket_cb(void *privdata, int fd)
 	struct libctx *ctx = privdata;
 	jmethodID mid;
 
+	if ((*ctx->jenv)->PushLocalFrame(ctx->jenv, 256) < 0)
+		return;
+
 	mid = get_obj_mid(ctx, ctx->jobj, "onProtectSocket", "(I)V");
 	if (mid)
 		(*ctx->jenv)->CallVoidMethod(ctx->jenv, ctx->jobj, mid, fd);
+
+	(*ctx->jenv)->PopLocalFrame(ctx->jenv, NULL);
 }
 
 static jobject new_auth_form(struct libctx *ctx, struct oc_auth_form *form)
@@ -411,15 +423,20 @@ static void progress_cb(void *privdata, int level, const char *fmt, ...)
 		return;
 	}
 
+	if ((*ctx->jenv)->PushLocalFrame(ctx->jenv, 256) < 0)
+		return;
+
 	jmsg = dup_to_jstring(ctx->jenv, msg);
 	free(msg);
 	if (!jmsg)
-		return;
+		goto out;
 
 	mid = get_obj_mid(ctx, ctx->jobj, "onProgress", "(ILjava/lang/String;)V");
 	if (mid)
 		(*ctx->jenv)->CallVoidMethod(ctx->jenv, ctx->jobj, mid, level, jmsg);
-	(*ctx->jenv)->DeleteLocalRef(ctx->jenv, jmsg);
+
+out:
+	(*ctx->jenv)->PopLocalFrame(ctx->jenv, NULL);
 }
 
 /* Library init/uninit */
