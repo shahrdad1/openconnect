@@ -53,6 +53,7 @@
 #include LIBPROXY_HDR
 #endif
 #include <getopt.h>
+#include <time.h>
 
 #include "openconnect-internal.h"
 
@@ -77,6 +78,7 @@ static void init_token(struct openconnect_info *vpninfo,
 #undef openconnect_version_str
 
 int verbose = PRG_INFO;
+int timestamp;
 int background;
 int do_passphrase_from_fsid;
 int nocertcheck;
@@ -120,6 +122,7 @@ enum {
 	OPT_TOKEN_MODE,
 	OPT_TOKEN_SECRET,
 	OPT_OS,
+	OPT_TIMESTAMP,
 };
 
 #ifdef __sun__
@@ -150,6 +153,7 @@ static struct option long_options[] = {
 	OPTION("script", 1, 's'),
 	OPTION("script-tun", 0, 'S'),
 	OPTION("syslog", 0, 'l'),
+	OPTION("timestamp", 0, OPT_TIMESTAMP),
 	OPTION("key-password", 1, 'p'),
 	OPTION("proxy", 1, 'P'),
 	OPTION("user", 1, 'u'),
@@ -261,6 +265,7 @@ static void usage(void)
 	printf("  -h, --help                      %s\n", _("Display help text"));
 	printf("  -i, --interface=IFNAME          %s\n", _("Use IFNAME for tunnel interface"));
 	printf("  -l, --syslog                    %s\n", _("Use syslog for progress messages"));
+	printf("      --timestamp                 %s\n", _("Prepend timestamp to progress messages"));
 	printf("  -U, --setuid=USER               %s\n", _("Drop privileges after connecting"));
 	printf("      --csd-user=USER             %s\n", _("Drop privileges during CSD execution"));
 	printf("      --csd-wrapper=SCRIPT        %s\n", _("Run SCRIPT instead of CSD binary"));
@@ -778,6 +783,9 @@ int main(int argc, char **argv)
 					xstrdup("AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA"));
 			}
 			break;
+		case OPT_TIMESTAMP:
+			timestamp = 1;
+			break;
 		default:
 			usage();
 		}
@@ -1016,6 +1024,14 @@ void write_progress(void *_vpninfo, int level, const char *fmt, ...)
 		outf = stderr;
 
 	if (verbose >= level) {
+		if (timestamp) {
+			char ts[64];
+			time_t t = time(NULL);
+			struct tm *tm = localtime(&t);
+
+			strftime(ts, 64, "[%Y-%m-%d %H:%M:%S] ", tm);
+			fprintf(outf, "%s", ts);
+		}
 		va_start(args, fmt);
 		vfprintf(outf, fmt, args);
 		va_end(args);
