@@ -32,9 +32,12 @@
 #include <unistd.h>
 
 #define OPENCONNECT_API_VERSION_MAJOR 2
-#define OPENCONNECT_API_VERSION_MINOR 2
+#define OPENCONNECT_API_VERSION_MINOR 3
 
 /*
+ * API version 2.3:
+ *  - Add OC_FORM_RESULT_* and oc_auth_form->authgroup_*
+ *
  * API version 2.2:
  *  - Add openconnect_set_token_mode(), openconnect_has_oath_support()
  *  - Deprecate openconnect_set_stoken_mode()
