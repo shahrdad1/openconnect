@@ -21,6 +21,11 @@
        <li>Fix Solaris build breakage due to missing <tt>&amp;lt;string.h&amp;gt;</tt> includes.</li>
        <li>Include path in <tt>&amp;lt;group-access&amp;gt;</tt> node.</li>
        <li>Include supporting CA certificates from PKCS#11 tokens <i>(with GnuTLS 3.2.7+)</i>.</li>
+       <li>Extend library API to support updating the auth form when the authgroup is changed <a href="https://bugs.launchpad.net/bugs/1229195"><i>(Ubuntu #1229195)</i></a>.</li>
+       <li>Fix spurious certificate mismatch warning if aborting XML POST changes the hostname.</li>
+       <li>Fix junk in <tt>--cookieonly</tt> output when CSD is enabled.</li>
+       <li>Fix Android build failures on NDK r9b and on MIPS.</li>
+       <li>Fix <tt>--cookie-on-stdin</tt> (network-manager-openconnect) compatibility with ocserv.</li>
      </ul><br/>
   </li>
   <li><b><a href="ftp://ftp.infradead.org/pub/openconnect/openconnect-5.01.tar.gz">OpenConnect v5.01</a></b>
