@@ -997,7 +997,7 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 {
 	struct vpn_option *opt;
 	char *form_buf = NULL;
-	struct oc_auth_form *form = NULL;
+	struct __oc_auth_form *form = NULL;
 	int result, buflen, tries;
 	char request_body[2048];
 	const char *request_body_type = "application/x-www-form-urlencoded";

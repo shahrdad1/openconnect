@@ -47,10 +47,10 @@
 #include "openconnect-internal.h"
 
 static int xmlpost_append_form_opts(struct openconnect_info *vpninfo,
-				    struct oc_auth_form *form, char *body, int bodylen);
+				    struct __oc_auth_form *form, char *body, int bodylen);
 static int can_gen_tokencode(struct openconnect_info *vpninfo,
-			     struct oc_auth_form *form, struct oc_form_opt *opt);
-static int do_gen_tokencode(struct openconnect_info *vpninfo, struct oc_auth_form *form);
+			     struct __oc_auth_form *form, struct __oc_form_opt *opt);
+static int do_gen_tokencode(struct openconnect_info *vpninfo, struct __oc_auth_form *form);
 
 static int append_opt(char *body, int bodylen, char *opt, char *name)
 {
@@ -99,9 +99,9 @@ static int append_opt(char *body, int bodylen, char *opt, char *name)
 }
 
 static int append_form_opts(struct openconnect_info *vpninfo,
-			    struct oc_auth_form *form, char *body, int bodylen)
+			    struct __oc_auth_form *form, char *body, int bodylen)
 {
-	struct oc_form_opt *opt;
+	struct __oc_form_opt *opt;
 	int ret;
 
 	for (opt = form->opts; opt; opt = opt->next) {
@@ -119,10 +119,10 @@ static int append_form_opts(struct openconnect_info *vpninfo,
  * So we just accept the first option with an auth-type property.
  */
 
-static int parse_auth_choice(struct openconnect_info *vpninfo, struct oc_auth_form *form,
+static int parse_auth_choice(struct openconnect_info *vpninfo, struct __oc_auth_form *form,
 			     xmlNode *xml_node)
 {
-	struct oc_form_opt_select *opt;
+	struct __oc_form_opt_select *opt;
 
 	opt = calloc(1, sizeof(*opt));
 	if (!opt)
@@ -140,7 +140,7 @@ static int parse_auth_choice(struct openconnect_info *vpninfo, struct oc_auth_fo
 
 	for (xml_node = xml_node->children; xml_node; xml_node = xml_node->next) {
 		char *form_id;
-		struct oc_choice *choice;
+		struct __oc_choice *choice;
 
 		if (xml_node->type != XML_ELEMENT_NODE)
 			continue;
@@ -180,13 +180,13 @@ static int parse_auth_choice(struct openconnect_info *vpninfo, struct oc_auth_fo
  *  < 0, on error
  *  = 0, when form was parsed
  */
-static int parse_form(struct openconnect_info *vpninfo, struct oc_auth_form *form,
+static int parse_form(struct openconnect_info *vpninfo, struct __oc_auth_form *form,
 		      xmlNode *xml_node)
 {
 	char *input_type, *input_name, *input_label;
 
 	for (xml_node = xml_node->children; xml_node; xml_node = xml_node->next) {
-		struct oc_form_opt *opt, **p;
+		struct __oc_form_opt *opt, **p;
 
 		if (xml_node->type != XML_ELEMENT_NODE)
 			continue;
@@ -417,7 +417,7 @@ static int xmlnode_get_text(xmlNode *xml_node, const char *name, char **var)
  */
 
 static int parse_auth_node(struct openconnect_info *vpninfo, xmlNode *xml_node,
-			   struct oc_auth_form *form)
+			   struct __oc_auth_form *form)
 {
 	int ret = 0;
 
@@ -487,9 +487,9 @@ static int parse_host_scan_node(struct openconnect_info *vpninfo, xmlNode *xml_n
  *  < 0, on error
  *  = 0, on success; *form is populated
  */
-int parse_xml_response(struct openconnect_info *vpninfo, char *response, struct oc_auth_form **formp, int *cert_rq)
+int parse_xml_response(struct openconnect_info *vpninfo, char *response, struct __oc_auth_form **formp, int *cert_rq)
 {
-	struct oc_auth_form *form;
+	struct __oc_auth_form *form;
 	xmlDocPtr xml_doc;
 	xmlNode *xml_node;
 	int ret;
@@ -585,7 +585,7 @@ int parse_xml_response(struct openconnect_info *vpninfo, char *response, struct 
  *  = OC_FORM_RESULT_CANCELLED, when response was cancelled by user
  *  = __OC_FORM_RESULT_LOGGEDIN, when form indicates that login was already successful
  */
-int handle_auth_form(struct openconnect_info *vpninfo, struct oc_auth_form *form,
+int handle_auth_form(struct openconnect_info *vpninfo, struct __oc_auth_form *form,
 		     char *request_body, int req_len, const char **method,
 		     const char **request_body_type)
 {
@@ -645,19 +645,19 @@ int handle_auth_form(struct openconnect_info *vpninfo, struct oc_auth_form *form
 	return ret;
 }
 
-void free_auth_form(struct oc_auth_form *form)
+void free_auth_form(struct __oc_auth_form *form)
 {
 	if (!form)
 		return;
 	while (form->opts) {
-		struct oc_form_opt *tmp = form->opts->next;
+		struct __oc_form_opt *tmp = form->opts->next;
 		if (form->opts->type == OC_FORM_OPT_TEXT ||
 		    form->opts->type == OC_FORM_OPT_PASSWORD ||
 		    form->opts->type == OC_FORM_OPT_HIDDEN ||
 		    form->opts->type == OC_FORM_OPT_TOKEN)
 			free(form->opts->value);
 		else if (form->opts->type == OC_FORM_OPT_SELECT) {
-			struct oc_form_opt_select *sel = (void *)form->opts;
+			struct __oc_form_opt_select *sel = (void *)form->opts;
 			int i;
 
 			for (i = 0; i < sel->nr_choices; i++) {
@@ -813,11 +813,11 @@ bad:
 }
 
 static int xmlpost_append_form_opts(struct openconnect_info *vpninfo,
-				    struct oc_auth_form *form, char *body, int bodylen)
+				    struct __oc_auth_form *form, char *body, int bodylen)
 {
 	xmlNodePtr root, node;
 	xmlDocPtr doc = xmlpost_new_query(vpninfo, "auth-reply", &root);
-	struct oc_form_opt *opt;
+	struct __oc_form_opt *opt;
 
 	if (!doc)
 		return -ENOMEM;
@@ -875,7 +875,7 @@ bad:
 
 
 #ifdef HAVE_LIBSTOKEN
-static void nuke_opt_values(struct oc_form_opt *opt)
+static void nuke_opt_values(struct __oc_form_opt *opt)
 {
 	for (; opt; opt = opt->next) {
 		free(opt->value);
@@ -899,8 +899,8 @@ static void nuke_opt_values(struct oc_form_opt *opt)
 int prepare_stoken(struct openconnect_info *vpninfo)
 {
 #ifdef HAVE_LIBSTOKEN
-	struct oc_auth_form form;
-	struct oc_form_opt opts[3], *opt = opts;
+	struct __oc_auth_form form;
+	struct __oc_form_opt opts[3], *opt = opts;
 	char **devid = NULL, **pass = NULL, **pin = NULL;
 	int ret = 0;
 
@@ -1020,8 +1020,8 @@ int prepare_stoken(struct openconnect_info *vpninfo)
  *  = 0, on success
  */
 static int can_gen_stoken_code(struct openconnect_info *vpninfo,
-			       struct oc_auth_form *form,
-			       struct oc_form_opt *opt)
+			       struct __oc_auth_form *form,
+			       struct __oc_form_opt *opt)
 {
 #ifdef HAVE_LIBSTOKEN
 	if ((strcmp(opt->name, "password") && strcmp(opt->name, "answer")) ||
@@ -1053,8 +1053,8 @@ static int can_gen_stoken_code(struct openconnect_info *vpninfo,
  *  = 0, on success
  */
 static int can_gen_totp_code(struct openconnect_info *vpninfo,
-			     struct oc_auth_form *form,
-			     struct oc_form_opt *opt)
+			     struct __oc_auth_form *form,
+			     struct __oc_form_opt *opt)
 {
 #ifdef HAVE_LIBOATH
 	if ((strcmp(opt->name, "secondary_password") != 0) ||
@@ -1085,8 +1085,8 @@ static int can_gen_totp_code(struct openconnect_info *vpninfo,
  *  = 0, on success
  */
 static int can_gen_tokencode(struct openconnect_info *vpninfo,
-			     struct oc_auth_form *form,
-			     struct oc_form_opt *opt)
+			     struct __oc_auth_form *form,
+			     struct __oc_form_opt *opt)
 {
 	switch (vpninfo->token_mode) {
 	case OC_TOKEN_MODE_STOKEN:
@@ -1101,8 +1101,8 @@ static int can_gen_tokencode(struct openconnect_info *vpninfo,
 }
 
 static int do_gen_stoken_code(struct openconnect_info *vpninfo,
-			      struct oc_auth_form *form,
-			      struct oc_form_opt *opt)
+			      struct __oc_auth_form *form,
+			      struct __oc_form_opt *opt)
 {
 #ifdef HAVE_LIBSTOKEN
 	char tokencode[STOKEN_MAX_TOKENCODE + 1];
@@ -1127,8 +1127,8 @@ static int do_gen_stoken_code(struct openconnect_info *vpninfo,
 }
 
 static int do_gen_totp_code(struct openconnect_info *vpninfo,
-			    struct oc_auth_form *form,
-			    struct oc_form_opt *opt)
+			    struct __oc_auth_form *form,
+			    struct __oc_form_opt *opt)
 {
 #ifdef HAVE_LIBOATH
 	int oath_err;
@@ -1165,9 +1165,9 @@ static int do_gen_totp_code(struct openconnect_info *vpninfo,
  *  = 0, on success
  */
 static int do_gen_tokencode(struct openconnect_info *vpninfo,
-			    struct oc_auth_form *form)
+			    struct __oc_auth_form *form)
 {
-	struct oc_form_opt *opt;
+	struct __oc_form_opt *opt;
 
 	for (opt = form->opts; ; opt = opt->next) {
 		/* this form might not have anything for us to do */

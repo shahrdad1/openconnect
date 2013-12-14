@@ -312,8 +312,8 @@ int  __attribute__ ((format (printf, 2, 3)))
 int request_passphrase(struct openconnect_info *vpninfo, const char *label,
 		       char **response, const char *fmt, ...)
 {
-	struct oc_auth_form f;
-	struct oc_form_opt o;
+	struct __oc_auth_form f;
+	struct __oc_form_opt o;
 	char buf[1024];
 	va_list args;
 	int ret;

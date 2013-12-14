@@ -231,12 +231,12 @@ int openconnect_SSL_gets(struct openconnect_info *vpninfo, char *buf, size_t len
 
 struct ui_data {
 	struct openconnect_info *vpninfo;
-	struct oc_form_opt **last_opt;
-	struct oc_auth_form form;
+	struct __oc_form_opt **last_opt;
+	struct __oc_auth_form form;
 };
 
 struct ui_form_opt {
-	struct oc_form_opt opt;
+	struct __oc_form_opt opt;
 	UI_STRING *uis;
 };
 

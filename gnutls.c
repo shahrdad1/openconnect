@@ -2118,8 +2118,8 @@ static P11KitPin *pin_callback(const char *pin_source, P11KitUri *pin_uri,
 {
 	struct openconnect_info *vpninfo = _vpninfo;
 	struct pin_cache **cache = &vpninfo->pin_cache;
-	struct oc_auth_form f;
-	struct oc_form_opt o;
+	struct __oc_auth_form f;
+	struct __oc_form_opt o;
 	char message[1024];
 	char *uri;
 	P11KitPin *pin;

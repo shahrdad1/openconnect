@@ -122,6 +122,11 @@ struct pin_cache {
 	char *pin;
 };
 
+#define __oc_form_opt		oc_form_opt
+#define __oc_choice		oc_choice
+#define __oc_form_opt_select	oc_form_opt_select
+#define __oc_auth_form		oc_auth_form
+
 #define RECONNECT_INTERVAL_MIN	10
 #define RECONNECT_INTERVAL_MAX	100
 
@@ -432,11 +437,11 @@ int config_lookup_host(struct openconnect_info *vpninfo, const char *host);
 
 /* auth.c */
 int parse_xml_response(struct openconnect_info *vpninfo, char *response,
-		       struct oc_auth_form **form, int *cert_rq);
-int handle_auth_form(struct openconnect_info *vpninfo, struct oc_auth_form *form,
+		       struct __oc_auth_form **form, int *cert_rq);
+int handle_auth_form(struct openconnect_info *vpninfo, struct __oc_auth_form *form,
 		     char *request_body, int req_len, const char **method,
 		     const char **request_body_type);
-void free_auth_form(struct oc_auth_form *form);
+void free_auth_form(struct __oc_auth_form *form);
 int xmlpost_initial_req(struct openconnect_info *vpninfo, char *request_body, int req_len, int cert_fail);
 int prepare_stoken(struct openconnect_info *vpninfo);
 
