@@ -324,18 +324,18 @@ int request_passphrase(struct openconnect_info *vpninfo, const char *label,
 	vsnprintf(buf, 1023, fmt, args);
 	va_end(args);
 
-	f.auth_id = (char *)label;
+	f.u.auth_id = (char *)label;
 	f.opts = &o;
 
 	o.next = NULL;
-	o.type = OC_FORM_OPT_PASSWORD;
-	o.name = (char *)label;
-	o.label = buf;
-	o.value = NULL;
+	o.u.type = OC_FORM_OPT_PASSWORD;
+	o.u.name = (char *)label;
+	o.u.label = buf;
+	o.u.value = NULL;
 
 	ret = process_auth_form(vpninfo, &f);
 	if (!ret) {
-		*response = o.value;
+		*response = o.u.value;
 		return 0;
 	}
 

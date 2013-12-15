@@ -1100,8 +1100,8 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 				goto fail;
 			continue;
 		}
-		if (form && form->action) {
-			vpninfo->redirect_url = strdup(form->action);
+		if (form && form->u.action) {
+			vpninfo->redirect_url = strdup(form->u.action);
 			handle_redirect(vpninfo);
 		}
 		break;
@@ -1194,8 +1194,8 @@ int openconnect_obtain_cookie(struct openconnect_info *vpninfo)
 		result = parse_xml_response(vpninfo, form_buf, &form, NULL);
 		if (result < 0)
 			goto out;
-		if (form->action) {
-			vpninfo->redirect_url = strdup(form->action);
+		if (form->u.action) {
+			vpninfo->redirect_url = strdup(form->u.action);
 			handle_redirect(vpninfo);
 		}
 	}
