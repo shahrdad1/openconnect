@@ -125,10 +125,15 @@ struct pin_cache {
 struct __oc_form_opt {
 	struct __oc_form_opt *next;
 	struct oc_form_opt u;
+	int second_auth;
 };
 
 struct __oc_choice {
 	struct oc_choice u;
+	int second_auth;
+	char *secondary_username;
+	int secondary_username_editable;
+	int noaaa;
 };
 
 struct __oc_form_opt_select {
