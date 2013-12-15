@@ -258,7 +258,7 @@ static int ui_open(UI *ui)
 	memset(ui_data, 0, sizeof(*ui_data));
 	ui_data->last_opt = &ui_data->form.opts;
 	ui_data->vpninfo = vpninfo;
-	ui_data->form.auth_id = (char *)"openssl_ui";
+	ui_data->form.u.auth_id = (char *)"openssl_ui";
 	UI_add_user_data(ui, ui_data);
 
 	return 1;
@@ -271,10 +271,10 @@ static int ui_write(UI *ui, UI_STRING *uis)
 
 	switch (UI_get_string_type(uis)) {
 	case UIT_ERROR:
-		ui_data->form.error = (char *)UI_get0_output_string(uis);
+		ui_data->form.u.error = (char *)UI_get0_output_string(uis);
 		break;
 	case UIT_INFO:
-		ui_data->form.message = (char *)UI_get0_output_string(uis);
+		ui_data->form.u.message = (char *)UI_get0_output_string(uis);
 		break;
 	case UIT_PROMPT:
 		opt = malloc(sizeof(*opt));
@@ -282,11 +282,11 @@ static int ui_write(UI *ui, UI_STRING *uis)
 			return 1;
 		memset(opt, 0, sizeof(*opt));
 		opt->uis = uis;
-		opt->opt.label = opt->opt.name = (char *)UI_get0_output_string(uis);
+		opt->opt.u.label = opt->opt.u.name = (char *)UI_get0_output_string(uis);
 		if (UI_get_input_flags(uis) & UI_INPUT_FLAG_ECHO)
-			opt->opt.type = OC_FORM_OPT_TEXT;
+			opt->opt.u.type = OC_FORM_OPT_TEXT;
 		else
-			opt->opt.type = OC_FORM_OPT_PASSWORD;
+			opt->opt.u.type = OC_FORM_OPT_PASSWORD;
 		*(ui_data->last_opt) = &opt->opt;
 		ui_data->last_opt = &opt->opt.next;
 		break;
@@ -312,8 +312,8 @@ static int ui_flush(UI *ui)
 
 	for (opt = (struct ui_form_opt *)ui_data->form.opts; opt;
 	     opt = (struct ui_form_opt *)opt->opt.next) {
-		if (opt->opt.value && opt->uis)
-			UI_set_result(ui, opt->uis, opt->opt.value);
+		if (opt->opt.u.value && opt->uis)
+			UI_set_result(ui, opt->uis, opt->opt.u.value);
 	}
 	return 1;
 }
@@ -326,8 +326,8 @@ static int ui_close(UI *ui)
 	opt = (struct ui_form_opt *)ui_data->form.opts;
 	while (opt) {
 		next_opt = (struct ui_form_opt *)opt->opt.next;
-		if (opt->opt.value)
-			free(opt->opt.value);
+		if (opt->opt.u.value)
+			free(opt->opt.u.value);
 		free(opt);
 		opt = next_opt;
 	}

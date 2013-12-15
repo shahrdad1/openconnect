@@ -122,10 +122,26 @@ struct pin_cache {
 	char *pin;
 };
 
-#define __oc_form_opt		oc_form_opt
-#define __oc_choice		oc_choice
-#define __oc_form_opt_select	oc_form_opt_select
-#define __oc_auth_form		oc_auth_form
+struct __oc_form_opt {
+	struct __oc_form_opt *next;
+	struct oc_form_opt u;
+};
+
+struct __oc_choice {
+	struct oc_choice u;
+};
+
+struct __oc_form_opt_select {
+	struct __oc_form_opt form;
+	struct oc_form_opt_select *u;
+	int nr_choices;
+	struct __oc_choice choices[0];
+};
+
+struct __oc_auth_form {
+	struct oc_auth_form u;
+	struct __oc_form_opt *opts;
+};
 
 #define RECONNECT_INTERVAL_MIN	10
 #define RECONNECT_INTERVAL_MAX	100
