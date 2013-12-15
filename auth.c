@@ -626,6 +626,8 @@ int process_auth_form(struct openconnect_info *vpninfo, struct __oc_auth_form *f
 	int ret;
 	struct __oc_form_opt *opt;
 	struct oc_form_opt **last;
+	struct __oc_form_opt_select *grp = form->authgroup_opt;
+	struct __oc_choice *auth_choice;
 
 	if (!vpninfo->process_auth_form) {
 		vpn_progress(vpninfo, PRG_ERR, _("No form handler; cannot authenticate.\n"));
@@ -633,6 +635,18 @@ int process_auth_form(struct openconnect_info *vpninfo, struct __oc_auth_form *f
 	}
 
 retry:
+	auth_choice = NULL;
+	if (grp && grp->nr_choices && !vpninfo->xmlpost) {
+		if (vpninfo->authgroup) {
+			/* For non-XML-POST, the server doesn't tell us which group is selected */
+			int i;
+			for (i = 0; i < grp->nr_choices; i++)
+				if (!strcmp(grp->choices[i].u.name, vpninfo->authgroup))
+					form->u.authgroup_selection = i;
+		}
+		auth_choice = &grp->choices[form->u.authgroup_selection];
+	}
+
 	/* We have two parallel linked lists of form fields here:
 	   form->u.opts is a linked list of user-visible oc_form_opt's
 	   form->opts is a linked list of internally-visible __oc_form_opt's
@@ -647,10 +661,26 @@ retry:
 				continue;
 			*last = (struct oc_form_opt *)sopt->u;
 			last = &sopt->u->form.next;
-		} else {
-			*last = &opt->u;
-			last = &opt->u.next;
+			continue;
+		} else if (!auth_choice) {
+			/* nothing left to check */
+		} else if (auth_choice->noaaa &&
+			   (opt->u.type == OC_FORM_OPT_TEXT || opt->u.type == OC_FORM_OPT_PASSWORD)) {
+			/* nuke all text fields for noaaa groups */
+			continue;
+		} else if (!auth_choice->second_auth && opt->second_auth) {
+			/* hide second-auth fields if a non-second-auth group is selected */
+			continue;
+		} else if (!strcmp(opt->u.name, "secondary_username") && opt->second_auth) {
+			if (auth_choice->secondary_username) {
+				free(opt->u.value);
+				opt->u.value = strdup(auth_choice->secondary_username);
+			}
+			if (!auth_choice->secondary_username_editable)
+				continue;
 		}
+		*last = &opt->u;
+		last = &opt->u.next;
 	}
 	*last = NULL;
 	ret = vpninfo->process_auth_form(vpninfo->cbdata, &form->u);
