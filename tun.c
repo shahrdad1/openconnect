@@ -797,6 +797,10 @@ int tun_mainloop(struct openconnect_info *vpninfo, int *timeout)
 				vpninfo->quit_reason = "Client connection terminated";
 				return 1;
 			}
+			if (errno == EBADF) {
+				vpninfo->quit_reason = "tun device unexpectedly shut down";
+				return 1;
+			}
 			vpn_progress(vpninfo, PRG_ERR,
 				     _("Failed to write incoming packet: %s\n"),
 				     strerror(errno));
