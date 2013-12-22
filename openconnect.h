@@ -163,6 +163,12 @@ struct oc_ip_info {
 	struct oc_split_include *split_excludes;
 };
 
+struct oc_vpn_option {
+	char *option;
+	char *value;
+	struct oc_vpn_option *next;
+};
+
 /****************************************************************************/
 
 #define PRG_ERR		0
