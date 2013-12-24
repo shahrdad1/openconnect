@@ -87,6 +87,7 @@ char *username;
 char *password;
 char *authgroup;
 int authgroup_set;
+int last_form_empty;
 
 enum {
 	OPT_AUTHENTICATE = 0x100,
@@ -666,7 +667,8 @@ int main(int argc, char **argv)
 			vpninfo->script_tun = 1;
 			break;
 		case 'u':
-			username = keep_config_arg();
+			free(username);
+			username = strdup(config_arg);
 			break;
 		case 'U': {
 			char *strend;
@@ -1175,6 +1177,7 @@ static int process_auth_form_cb(void *_vpninfo,
 	struct openconnect_info *vpninfo = _vpninfo;
 	struct oc_form_opt *opt;
 	struct oc_form_opt_select *authgroup_opt = NULL;
+	int empty = 1;
 
 	if (form->banner && verbose > PRG_ERR)
 		fprintf(stderr, "%s\n", form->banner);
@@ -1220,17 +1223,20 @@ static int process_auth_form_cb(void *_vpninfo,
 				continue;
 			if (prompt_opt_select(vpninfo, select_opt, NULL) < 0)
 				goto err;
+			empty = 0;
 
 		} else if (opt->type == OC_FORM_OPT_TEXT) {
 			if (username &&
 			    !strcmp(opt->name, "username")) {
-				opt->value = strdup(username);
+				opt->value = username;
+				username = NULL;
 			} else {
 				opt->value = prompt_for_input(opt->label, vpninfo, 0);
 			}
 
 			if (!opt->value)
 				goto err;
+			empty = 0;
 
 		} else if (opt->type == OC_FORM_OPT_PASSWORD) {
 			if (password &&
@@ -1243,6 +1249,7 @@ static int process_auth_form_cb(void *_vpninfo,
 
 			if (!opt->value)
 				goto err;
+			empty = 0;
 		}
 	}
 
@@ -1250,6 +1257,11 @@ static int process_auth_form_cb(void *_vpninfo,
 		free(password);
 		password = NULL;
 	}
+
+	/* prevent infinite loops if the authgroup requires certificate auth only */
+	if (last_form_empty && empty)
+		return OC_FORM_RESULT_CANCELLED;
+	last_form_empty = empty;
 
 	return OC_FORM_RESULT_OK;
 
