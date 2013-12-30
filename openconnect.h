@@ -135,7 +135,12 @@ struct oc_auth_form {
 	char *auth_id;
 	char *method;
 	char *action;
+	char *authgroup_field;
+	int authgroup_selection;
 	struct oc_form_opt *opts;
+#ifdef __OPENCONNECT_PRIVATE__
+	struct oc_form_opt_select *authgroup_opt;
+#endif
 };
 
 /****************************************************************************/
