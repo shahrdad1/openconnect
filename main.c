@@ -1184,6 +1184,9 @@ static int process_auth_form_cb(void *_vpninfo,
 
 	for (opt = form->opts; opt; opt = opt->next) {
 
+		if (opt->flags & OC_FORM_OPT_IGNORE)
+			continue;
+
 		if (opt->type == OC_FORM_OPT_TEXT) {
 			if (username &&
 			    !strcmp(opt->name, "username")) {
