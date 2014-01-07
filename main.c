@@ -86,6 +86,7 @@ int cookieonly;
 char *username;
 char *password;
 char *authgroup;
+int authgroup_set;
 
 enum {
 	OPT_AUTHENTICATE = 0x100,
@@ -1174,7 +1175,6 @@ static int process_auth_form_cb(void *_vpninfo,
 {
 	struct openconnect_info *vpninfo = _vpninfo;
 	struct oc_form_opt *opt;
-	const char *authgroup_field = "group_list";
 	struct oc_form_opt_select *authgroup_opt = NULL;
 
 	if (form->banner && verbose > PRG_ERR)
@@ -1188,11 +1188,11 @@ static int process_auth_form_cb(void *_vpninfo,
 
 	/* Special handling for GROUP: field if present, as different group
 	   selections can make other fields disappear/reappear */
-	if (authgroup_field) {
+	if (form->authgroup_field) {
 		for (opt = form->opts; opt; opt = opt->next) {
 
 			if (opt->type == OC_FORM_OPT_SELECT &&
-			    !strcmp(authgroup_field, opt->name)) {
+			    !strcmp(form->authgroup_field, opt->name)) {
 
 				authgroup_opt = (void *)opt;
 				if (authgroup &&
@@ -1203,9 +1203,16 @@ static int process_auth_form_cb(void *_vpninfo,
 				break;
 			}
 		}
+		if (authgroup_opt && !authgroup_set) {
+			authgroup_set = 1;
+			return OC_FORM_RESULT_NEWGROUP;
+		}
 	}
 
 	for (opt = form->opts; opt; opt = opt->next) {
+
+		if (opt->flags & OC_FORM_OPT_IGNORE)
+			continue;
 
 		if (opt->type == OC_FORM_OPT_SELECT) {
 			struct oc_form_opt_select *select_opt = (void *)opt;
